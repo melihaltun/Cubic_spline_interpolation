@@ -8,18 +8,18 @@
 /* Finds polynomial coefficients for cubic spline interpolation
 parameters: (outputs) c0, c1, c2, c3 poly coefficients for each spline interval
 			(inputs) x coordinates, y coordinates, number of points */
-void cubicSpline(double c0[], double c1[], double c2[], double c3[], double x[], double y[], int n)
+void cubicSpline(float c0[], float c1[], float c2[], float c3[], float x[], float y[], int n)
 {
 	int i;
-	double *diff_x, *diff_y, *A, *A_inv, *m, *b;
-	diff_x = new double[n - 1];
-	diff_y = new double[n - 1];
-	A = new double[(n - 2)*(n - 2)];
-	A_inv = new double[(n - 2)*(n - 2)];
-	b = new double[n - 2];
-	m = new double[n];
+	float *diff_x, *diff_y, *A, *A_inv, *m, *b;
+	diff_x = new float[n - 1];
+	diff_y = new float[n - 1];
+	A = new float[(n - 2)*(n - 2)];
+	A_inv = new float[(n - 2)*(n - 2)];
+	b = new float[n - 2];
+	m = new float[n];
 
-	memset(A, 0, (n - 2)*(n - 2)*sizeof(double));
+	memset(A, 0, (n - 2)*(n - 2)*sizeof(float));
 
 	//dx, dy
 	for (i = 0; i < n - 1; i++) {
@@ -60,4 +60,49 @@ void cubicSpline(double c0[], double c1[], double c2[], double c3[], double x[],
 	delete[] A_inv;
 	delete[] m;
 	delete[] b;
+}
+
+
+
+// Evaluate the cubic polynomial for a single segment using the segment's coefficients and a given x value
+float evaluate_segment(float x, float coeffs_segment[]) {
+	float y = coeffs_segment[3] * pow(x, 3) + coeffs_segment[2] * pow(x, 2) + coeffs_segment[1] * x + coeffs_segment[0];
+	return y;
+}
+
+
+// finds the x segment where calculations will take place
+int getSegmentIndex(float x1[], int n1, float x)
+{
+	for (int i = n1 - 1; i >= 0; i--) {
+		if (x >= x1[i])
+			return i;
+	}
+	return 0;
+}
+
+// Evaluate the cubic polynomial using all of the segment coefficients and a given x value
+// parameters: (output) y2: interpolated y value;
+//             (inputs) x2: new x values for interpolation, n2: number of x2 and y2 elements, x1: x coordinates before interpolation, 
+//             (inputs) c0, c1, c2, c3: poly coefficients for each spline interval
+void evaluate_polynomial(float y2[], float x2[], int n2, float x1[], int n1, float c0[], float c1[], float c2[], float c3[])
+{
+	float x;
+	int n_segments, segment_index, start_index, end_index;
+	float segment_coeffs[4];
+	n_segments = n1 - 1;
+	for (int i = 0; i < n2; i++) {
+		x = x2[i];
+		segment_index = getSegmentIndex(x1, n1, x);
+
+		if (segment_index == n_segments)
+			segment_index = n_segments - 1;
+
+		segment_coeffs[0] = c0[segment_index];
+		segment_coeffs[1] = c1[segment_index];
+		segment_coeffs[2] = c2[segment_index];
+		segment_coeffs[3] = c3[segment_index];
+	
+		y2[i] = evaluate_segment(x-x1[segment_index], segment_coeffs);
+	}
 }
