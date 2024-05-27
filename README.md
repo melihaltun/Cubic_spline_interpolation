@@ -1,6 +1,6 @@
 # Cubic_spline_interpolation
 A cubic spline interpolation implementation that returns cubic polynomial coefficients for each segment of inputs.
-Once polynomial coefficients are found, there is a secondary function that outputs spline interpolated values for given inputs.
+Once polynomial coefficients are found, a secondary function can be called which outputs spline interpolated values for given inputs.
 
 This code takes an x and a corresponding y sequence, each with length n, and returns cubic polynomial coefficients for each segment. Therefore the returned c0[], c1[], c2[] and c3[] arrays all have size n-1.
 
